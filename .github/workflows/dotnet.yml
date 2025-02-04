@@ -21,7 +21,11 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
-      run: dotnet restore *.csproj
+      run: |
+        for proj in $(find . -name '*.csproj'); do
+          echo "Restoring $proj"
+          dotnet restore $proj
+        done
     - name: Build
       run: dotnet build --no-restore
     - name: Test
