@@ -56,4 +56,4 @@ jobs:
         docker-compose -f ./docker-compose.yml run --rm urlshortener-api /bin/bash -c "for proj in $(find . -name '*.csproj'); do
           echo 'Running tests for $proj';
           dotnet test $proj --no-build --verbosity normal;
-        done
+        done"
