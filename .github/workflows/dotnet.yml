@@ -27,6 +27,10 @@ jobs:
           dotnet restore $proj
         done
     - name: Build
-      run: dotnet build --no-restore
+      run: |
+        for proj in $(find . -name '*.csproj'); do
+          echo "Restoring $proj"
+          dotnet build $proj
+        done
     - name: Test
       run: dotnet test --no-build --verbosity normal
