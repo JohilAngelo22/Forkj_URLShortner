@@ -33,7 +33,7 @@ jobs:
           dotnet build $proj
         done
     - name: Test
-       run: |
+      run: |
         for proj in $(find . -name '*.csproj'); do
           echo "Running tests for $proj"
           dotnet test $proj --no-build --verbosity normal
