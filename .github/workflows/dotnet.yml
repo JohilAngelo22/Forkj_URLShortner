@@ -1,0 +1,59 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # Set up .NET SDK (for building the Docker image and for testing the project)
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    # Restore dependencies
+    - name: Restore dependencies
+      run: |
+        for proj in $(find . -name '*.csproj'); do
+          echo "Restoring $proj"
+          dotnet restore $proj
+        done
+
+    # Build project (Optional, if you want to build outside Docker)
+    - name: Build
+      run: |
+        for proj in $(find . -name '*.csproj'); do
+          echo "Building $proj"
+          dotnet build $proj
+        done
+
+    # Install Docker Compose
+    - name: Install Docker Compose
+      run: |
+        sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+        docker-compose --version  # Verify installation
+
+    # Build Docker image with docker-compose
+    - name: Build Docker Compose
+      run: |
+        docker-compose -f ./docker-compose.yml build
+
+    # Run tests inside Docker container using docker-compose
+    - name: Run tests in Docker container
+      run: |
+        docker-compose -f ./docker-compose.yml run --rm urlshortener.api /bin/bash -c "for proj in $(find . -name '*.csproj'); do
+          echo 'Running tests for $proj';
+          dotnet test $proj --no-build --verbosity normal;
+        done"
